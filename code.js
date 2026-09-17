@@ -1,504 +1,497 @@
 figma.showUI(__html__, {
-  width: 340,
-  height: 500,
+  width: 360,
+  height: 400,
   themeColors: true
 });
 
-const PREFIX = "__FOCUS_STROKE__";
+/* =====================================================
+   LID SAFE TEXT CLEANER
+   -----------------------------------------------------
+   1. 모든 Text Layer → Inter
+   2. 일반 Text Layer Name → "-"
+   3. LID Text Layer Name → 유지
+   4. 실제 characters는 변경하지 않음
+===================================================== */
 
-let rootFrame = null;
-let previewRect = null;
+const loadedFonts = new Set();
 
-let settings = {
-  padding: 4,
-  strokeWeight: 3,
-  radius: 10,
-  color: "#E63312",
-  autoPreview: true
-};
+/* =====================================================
+   LID CHECK
+===================================================== */
 
-/* =========================================================
-   UTIL
-========================================================= */
+function isLidName(name) {
+  const value = String(name || "").trim();
 
-function send(type, data = {}) {
-  figma.ui.postMessage({
-    type,
-    ...data
-  });
-}
+  if (!value) return false;
 
-function hexToRgb(hex) {
-  const clean = hex.replace("#", "");
+  const lower = value.toLowerCase();
 
-  const value = parseInt(clean, 16);
+  // 기존 LID 규칙
+  if (
+    lower.startsWith("cci_ctn_") ||
+    lower.startsWith("cci_msg_") ||
+    lower.startsWith("ctn_") ||
+    lower.startsWith("msg_")
+  ) {
+    return true;
+  }
 
-  return {
-    r: ((value >> 16) & 255) / 255,
-    g: ((value >> 8) & 255) / 255,
-    b: (value & 255) / 255
-  };
-}
+  /*
+   * Prefix가 없는 기존 LID 보호
+   *
+   * 예:
+   * service_milestone_mileage_left_k
+   * maintenance_process_card_04_eu_h
+   *
+   * 조건
+   * - 공백 없음
+   * - 영문/숫자/underscore만 사용
+   * - underscore가 2개 이상
+   * - _h / _k / _g 로 종료
+   */
+  const suffixLidPattern =
+    /^[a-z0-9]+(?:_[a-z0-9]+){2,}_[hkg]$/i;
 
-function isValidRoot(node) {
-  return node && node.type === "FRAME";
-}
-
-function isDescendantOf(node, ancestor) {
-  let current = node.parent;
-
-  while (current) {
-    if (current.id === ancestor.id) {
-      return true;
-    }
-
-    current = current.parent;
+  if (suffixLidPattern.test(value)) {
+    return true;
   }
 
   return false;
 }
 
-function isHighlight(node) {
-  return (
-    node &&
-    typeof node.name === "string" &&
-    node.name.startsWith(PREFIX)
-  );
-}
+/* =====================================================
+   COLLECT TEXT NODES
+===================================================== */
 
-/* =========================================================
-   SELECTION
-========================================================= */
+function collectTextNodes(selection) {
+  const result = [];
+  const seen = new Set();
 
-function getTargetSelection() {
-  if (!rootFrame) {
-    return [];
-  }
-
-  return figma.currentPage.selection.filter((node) => {
-    if (isHighlight(node)) {
-      return false;
+  function add(node) {
+    if (
+      !node ||
+      node.type !== "TEXT" ||
+      seen.has(node.id)
+    ) {
+      return;
     }
 
-    if (node.id === rootFrame.id) {
-      return false;
+    seen.add(node.id);
+    result.push(node);
+  }
+
+  for (const selectedNode of selection) {
+
+    // Text 자체를 선택한 경우
+    if (selectedNode.type === "TEXT") {
+      add(selectedNode);
     }
 
-    return isDescendantOf(node, rootFrame);
-  });
-}
+    // Frame / Group / Component / Instance 등
+    if ("findAll" in selectedNode) {
+      const textNodes = selectedNode.findAll(
+        node => node.type === "TEXT"
+      );
 
-/* =========================================================
-   BOUNDS
-========================================================= */
-
-function getUnionBounds(nodes) {
-  if (!nodes.length) {
-    return null;
-  }
-
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  let found = false;
-
-  for (const node of nodes) {
-    const bounds = node.absoluteBoundingBox;
-
-    if (!bounds) {
-      continue;
+      for (const textNode of textNodes) {
+        add(textNode);
+      }
     }
-
-    found = true;
-
-    minX = Math.min(minX, bounds.x);
-    minY = Math.min(minY, bounds.y);
-
-    maxX = Math.max(
-      maxX,
-      bounds.x + bounds.width
-    );
-
-    maxY = Math.max(
-      maxY,
-      bounds.y + bounds.height
-    );
   }
 
-  if (!found) {
-    return null;
-  }
-
-  return {
-    x: minX,
-    y: minY,
-    width: maxX - minX,
-    height: maxY - minY
-  };
+  return result;
 }
 
-/* =========================================================
-   PREVIEW
-========================================================= */
+/* =====================================================
+   INTER STYLE MAPPING
+===================================================== */
 
-function removePreview() {
-  if (!previewRect) {
-    return;
+function mapToInterStyle(styleName) {
+  const original = String(styleName || "Regular");
+
+  const normalized = original
+    .toLowerCase()
+    .replace(/[-_]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const italic =
+    normalized.includes("italic") ||
+    normalized.includes("oblique");
+
+  let weight = "Regular";
+
+  if (
+    normalized.includes("black") ||
+    normalized.includes("900")
+  ) {
+    weight = "Black";
+  }
+
+  else if (
+    normalized.includes("extra bold") ||
+    normalized.includes("extrabold") ||
+    normalized.includes("ultra bold") ||
+    normalized.includes("800")
+  ) {
+    weight = "Extra Bold";
+  }
+
+  else if (
+    normalized.includes("semi bold") ||
+    normalized.includes("semibold") ||
+    normalized.includes("demi bold") ||
+    normalized.includes("demibold") ||
+    normalized.includes("600")
+  ) {
+    weight = "Semi Bold";
+  }
+
+  else if (
+    normalized.includes("bold") ||
+    normalized.includes("700")
+  ) {
+    weight = "Bold";
+  }
+
+  else if (
+    normalized.includes("medium") ||
+    normalized.includes("500")
+  ) {
+    weight = "Medium";
+  }
+
+  else if (
+    normalized.includes("extra light") ||
+    normalized.includes("extralight") ||
+    normalized.includes("ultra light") ||
+    normalized.includes("200")
+  ) {
+    weight = "Extra Light";
+  }
+
+  else if (
+    normalized.includes("light") ||
+    normalized.includes("300")
+  ) {
+    weight = "Light";
+  }
+
+  else if (
+    normalized.includes("thin") ||
+    normalized.includes("100")
+  ) {
+    weight = "Thin";
+  }
+
+  if (!italic) {
+    return weight;
+  }
+
+  if (weight === "Regular") {
+    return "Italic";
+  }
+
+  return `${weight} Italic`;
+}
+
+/* =====================================================
+   FONT LOADER
+===================================================== */
+
+async function loadInterFont(style) {
+  const key = `Inter::${style}`;
+
+  if (loadedFonts.has(key)) {
+    return {
+      family: "Inter",
+      style
+    };
   }
 
   try {
-    if (!previewRect.removed) {
-      previewRect.remove();
-    }
-  } catch (error) {
-    // 이미 삭제된 경우 무시
-  }
-
-  previewRect = null;
-}
-
-function createPreviewRect() {
-  const rect = figma.createRectangle();
-
-  rect.name = `${PREFIX}_PREVIEW`;
-
-  rect.fills = [];
-
-  rect.strokeAlign = "INSIDE";
-
-  rect.strokes = [
-    {
-      type: "SOLID",
-      color: hexToRgb(settings.color)
-    }
-  ];
-
-  rect.strokeWeight = settings.strokeWeight;
-
-  rect.cornerRadius = settings.radius;
-
-  return rect;
-}
-
-/* =========================================================
-   HIGHLIGHT UPDATE
-========================================================= */
-
-function updatePreview() {
-  if (!rootFrame) {
-    removePreview();
-
-    send("status", {
-      message: "먼저 기준 Frame을 등록해주세요.",
-      kind: "warning"
+    await figma.loadFontAsync({
+      family: "Inter",
+      style
     });
 
-    return;
+    loadedFonts.add(key);
+
+    return {
+      family: "Inter",
+      style
+    };
+  } catch (_) {
+    return null;
   }
-
-  const selection = getTargetSelection();
-
-  if (!selection.length) {
-    removePreview();
-
-    send("selection-info", {
-      count: 0
-    });
-
-    return;
-  }
-
-  const bounds = getUnionBounds(selection);
-
-  if (!bounds) {
-    removePreview();
-    return;
-  }
-
-  const rootBounds = rootFrame.absoluteBoundingBox;
-
-  if (!rootBounds) {
-    removePreview();
-
-    send("status", {
-      message: "기준 Frame의 위치 정보를 읽을 수 없습니다.",
-      kind: "error"
-    });
-
-    return;
-  }
-
-  const padding = settings.padding;
-
-  const x =
-    bounds.x -
-    rootBounds.x -
-    padding;
-
-  const y =
-    bounds.y -
-    rootBounds.y -
-    padding;
-
-  const width =
-    bounds.width +
-    padding * 2;
-
-  const height =
-    bounds.height +
-    padding * 2;
-
-  if (!previewRect || previewRect.removed) {
-    previewRect = createPreviewRect();
-
-    rootFrame.appendChild(previewRect);
-  }
-
-  /*
-   * 핵심
-   *
-   * 기준 Frame이 Auto Layout인 경우에도
-   * Highlight Rectangle은 Auto Layout 흐름에 참여하지 않는다.
-   */
-  if (rootFrame.layoutMode !== "NONE") {
-    previewRect.layoutPositioning = "ABSOLUTE";
-  }
-
-  previewRect.locked = false;
-
-  previewRect.x = x;
-  previewRect.y = y;
-
-  previewRect.resize(
-    Math.max(1, width),
-    Math.max(1, height)
-  );
-
-  previewRect.strokeWeight =
-    settings.strokeWeight;
-
-  previewRect.cornerRadius =
-    Math.min(
-      settings.radius,
-      width / 2,
-      height / 2
-    );
-
-  previewRect.strokes = [
-    {
-      type: "SOLID",
-      color: hexToRgb(settings.color)
-    }
-  ];
-
-  /*
-   * 항상 화면의 가장 위에 표시
-   */
-  rootFrame.appendChild(previewRect);
-
-  /*
-   * Canvas에서 실수로 잡히지 않도록 Lock
-   */
-  previewRect.locked = true;
-
-  send("selection-info", {
-    count: selection.length,
-    width: Math.round(bounds.width),
-    height: Math.round(bounds.height)
-  });
-
-  send("status", {
-    message: `${selection.length}개 레이어를 기준으로 영역을 표시했습니다.`,
-    kind: "success"
-  });
 }
 
-/* =========================================================
-   ROOT FRAME
-========================================================= */
+/* =====================================================
+   INTER FONT FALLBACK
+===================================================== */
 
-function setRootFrame() {
+async function resolveInterFont(style) {
+  const candidates = [];
+
+  // 원래 Weight 최대한 유지
+  candidates.push(style);
+
+  // Italic 계열이면 일반 Italic도 시도
+  if (style.includes("Italic")) {
+    candidates.push("Italic");
+  }
+
+  // 이후 Regular
+  candidates.push("Regular");
+
+  const uniqueCandidates =
+    [...new Set(candidates)];
+
+  for (const candidate of uniqueCandidates) {
+    const font =
+      await loadInterFont(candidate);
+
+    if (font) {
+      return font;
+    }
+  }
+
+  return null;
+}
+
+/* =====================================================
+   CONVERT TEXT NODE → INTER
+===================================================== */
+
+async function convertTextNodeToInter(node) {
+  const result = {
+    changed: false,
+    convertedSegments: 0,
+    failedSegments: 0
+  };
+
+  if (!node || node.type !== "TEXT") {
+    return result;
+  }
+
+  let segments;
+
+  try {
+    segments =
+      node.getStyledTextSegments([
+        "fontName"
+      ]);
+  } catch (_) {
+    result.failedSegments++;
+    return result;
+  }
+
+  if (!segments || segments.length === 0) {
+    return result;
+  }
+
+  for (const segment of segments) {
+
+    const currentFont =
+      segment.fontName;
+
+    let currentStyle =
+      "Regular";
+
+    if (
+      currentFont &&
+      currentFont !== figma.mixed &&
+      currentFont.style
+    ) {
+      currentStyle =
+        currentFont.style;
+    }
+
+    const desiredStyle =
+      mapToInterStyle(currentStyle);
+
+    /*
+     * 이미 원하는 Inter 스타일이면 Skip
+     */
+    if (
+      currentFont &&
+      currentFont !== figma.mixed &&
+      currentFont.family === "Inter" &&
+      currentFont.style === desiredStyle
+    ) {
+      continue;
+    }
+
+    const targetFont =
+      await resolveInterFont(
+        desiredStyle
+      );
+
+    if (!targetFont) {
+      result.failedSegments++;
+      continue;
+    }
+
+    try {
+      node.setRangeFontName(
+        segment.start,
+        segment.end,
+        targetFont
+      );
+
+      result.changed = true;
+      result.convertedSegments++;
+
+    } catch (_) {
+      result.failedSegments++;
+    }
+  }
+
+  return result;
+}
+
+/* =====================================================
+   PROCESS
+===================================================== */
+
+async function runCleaner() {
   const selection =
     figma.currentPage.selection;
 
-  if (selection.length !== 1) {
-    send("status", {
-      message: "기준으로 사용할 Frame 하나만 선택해주세요.",
-      kind: "error"
+  if (!selection.length) {
+    figma.ui.postMessage({
+      type: "error",
+      message:
+        "정리할 Frame, Group 또는 Text Layer를 선택해주세요."
     });
 
     return;
   }
 
-  const node = selection[0];
+  const textNodes =
+    collectTextNodes(selection);
 
-  if (!isValidRoot(node)) {
-    send("status", {
-      message: "기준 영역은 Frame이어야 합니다.",
-      kind: "error"
+  if (!textNodes.length) {
+    figma.ui.postMessage({
+      type: "error",
+      message:
+        "선택한 영역에서 Text Layer를 찾지 못했습니다."
     });
 
     return;
   }
 
-  removePreview();
-
-  rootFrame = node;
-
-  send("root-set", {
-    name: rootFrame.name
+  figma.ui.postMessage({
+    type: "processing"
   });
 
-  send("status", {
-    message: "기준 Frame이 등록되었습니다. 이제 강조할 영역을 선택해주세요.",
-    kind: "success"
+  const stats = {
+    total: textNodes.length,
+
+    interConverted: 0,
+    interSegments: 0,
+    fontFailed: 0,
+
+    renamedToHyphen: 0,
+    lidProtected: 0,
+
+    renameFailed: 0
+  };
+
+  for (const node of textNodes) {
+
+    /*
+     * 중요:
+     * 이름을 변경하기 전에 먼저
+     * LID 여부 저장
+     */
+    const hasLid =
+      isLidName(node.name);
+
+    /* -----------------------------------------
+       FONT → INTER
+
+       LID 여부와 관계없이 모든 Text에 적용
+    ----------------------------------------- */
+
+    const fontResult =
+      await convertTextNodeToInter(node);
+
+    if (fontResult.changed) {
+      stats.interConverted++;
+    }
+
+    stats.interSegments +=
+      fontResult.convertedSegments;
+
+    stats.fontFailed +=
+      fontResult.failedSegments;
+
+    /* -----------------------------------------
+       LAYER NAME
+    ----------------------------------------- */
+
+    if (hasLid) {
+
+      // ★ LID는 절대 "-"로 변경하지 않음
+      stats.lidProtected++;
+
+    } else {
+
+      try {
+
+        if (node.name !== "-") {
+          node.name = "-";
+          stats.renamedToHyphen++;
+        }
+
+      } catch (_) {
+
+        stats.renameFailed++;
+      }
+    }
+  }
+
+  figma.ui.postMessage({
+    type: "complete",
+    stats
   });
+
+  figma.notify(
+    `완료 · Text ${stats.total} · LID 보호 ${stats.lidProtected} · "-" ${stats.renamedToHyphen} · Inter ${stats.interConverted}`
+  );
 }
 
-/* =========================================================
-   CONFIRM
-========================================================= */
-
-function confirmPreview() {
-  if (!previewRect || previewRect.removed) {
-    send("status", {
-      message: "확정할 Highlight가 없습니다.",
-      kind: "warning"
-    });
-
-    return;
-  }
-
-  const existing = rootFrame.findAll((node) => {
-    return (
-      isHighlight(node) &&
-      node.name !== `${PREFIX}_PREVIEW`
-    );
-  });
-
-  const number =
-    String(existing.length + 1).padStart(2, "0");
-
-  previewRect.locked = false;
-
-  previewRect.name =
-    `${PREFIX}_${number}`;
-
-  previewRect.locked = true;
-
-  previewRect = null;
-
-  send("status", {
-    message: `Highlight ${number}이 확정되었습니다.`,
-    kind: "success"
-  });
-}
-
-/* =========================================================
-   DELETE ALL
-========================================================= */
-
-function clearHighlights() {
-  if (!rootFrame) {
-    send("status", {
-      message: "등록된 기준 Frame이 없습니다.",
-      kind: "warning"
-    });
-
-    return;
-  }
-
-  const nodes = rootFrame.findAll((node) => {
-    return isHighlight(node);
-  });
-
-  for (const node of nodes) {
-    node.remove();
-  }
-
-  previewRect = null;
-
-  send("status", {
-    message: `${nodes.length}개의 Highlight를 삭제했습니다.`,
-    kind: "success"
-  });
-}
-
-/* =========================================================
-   SELECTION LISTENER
-========================================================= */
-
-figma.on("selectionchange", () => {
-  if (!rootFrame) {
-    return;
-  }
-
-  if (!settings.autoPreview) {
-    return;
-  }
-
-  updatePreview();
-});
-
-/* =========================================================
+/* =====================================================
    MESSAGE
-========================================================= */
+===================================================== */
 
-figma.ui.onmessage = (msg) => {
-  switch (msg.type) {
-    case "set-root": {
-      setRootFrame();
-      break;
+figma.ui.onmessage =
+  async msg => {
+
+    if (!msg) {
+      return;
     }
 
-    case "refresh-preview": {
-      updatePreview();
-      break;
-    }
+    if (msg.type === "run") {
 
-    case "confirm": {
-      confirmPreview();
-      break;
-    }
+      try {
+        await runCleaner();
+      } catch (error) {
 
-    case "remove-preview": {
-      removePreview();
+        console.error(error);
 
-      send("selection-info", {
-        count: 0
-      });
-
-      send("status", {
-        message: "미리보기를 제거했습니다.",
-        kind: "success"
-      });
-
-      break;
-    }
-
-    case "clear-all": {
-      clearHighlights();
-      break;
-    }
-
-    case "settings": {
-      settings = {
-        ...settings,
-        ...msg.settings
-      };
-
-      if (previewRect) {
-        updatePreview();
+        figma.ui.postMessage({
+          type: "error",
+          message:
+            "작업 중 오류가 발생했습니다."
+        });
       }
 
-      break;
+      return;
     }
 
-    case "close": {
+    if (msg.type === "close") {
       figma.closePlugin();
-      break;
     }
-  }
-};
+  };
