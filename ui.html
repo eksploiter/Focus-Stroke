@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      font-size: 12px;
+
+      background: var(--figma-color-bg);
+      color: var(--figma-color-text);
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .description {
+      color: var(--figma-color-text-secondary);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .section {
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--figma-color-text-secondary);
+    }
+
+    .root-box {
+      padding: 10px 12px;
+
+      border: 1px solid
+        var(--figma-color-border);
+
+      border-radius: 6px;
+
+      margin-bottom: 8px;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .root-box.empty {
+      color:
+        var(--figma-color-text-tertiary);
+    }
+
+    button {
+      width: 100%;
+      height: 34px;
+
+      border: none;
+      border-radius: 6px;
+
+      cursor: pointer;
+
+      font-size: 12px;
+      font-weight: 600;
+
+      transition: 0.15s;
+    }
+
+    .primary {
+      background:
+        var(--figma-color-bg-brand);
+
+      color:
+        var(--figma-color-text-onbrand);
+    }
+
+    .primary:hover {
+      background:
+        var(--figma-color-bg-brand-hover);
+    }
+
+    .secondary {
+      background:
+        var(--figma-color-bg-secondary);
+
+      color:
+        var(--figma-color-text);
+    }
+
+    .secondary:hover {
+      background:
+        var(--figma-color-bg-hover);
+    }
+
+    .danger {
+      background: transparent;
+
+      color:
+        var(--figma-color-text-danger);
+
+      border:
+        1px solid
+        var(--figma-color-border);
+    }
+
+    .danger:hover {
+      background:
+        var(--figma-color-bg-danger-tertiary);
+    }
+
+    .instruction {
+      padding: 12px;
+
+      background:
+        var(--figma-color-bg-secondary);
+
+      border-radius: 6px;
+
+      line-height: 1.6;
+
+      margin-bottom: 10px;
+    }
+
+    .instruction strong {
+      font-weight: 700;
+    }
+
+    .selection-info {
+      margin-top: 8px;
+
+      color:
+        var(--figma-color-text-secondary);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      margin-bottom: 8px;
+    }
+
+    .row label {
+      flex: 1;
+    }
+
+    input[type="number"] {
+      width: 72px;
+      height: 30px;
+
+      padding: 0 8px;
+
+      border:
+        1px solid
+        var(--figma-color-border);
+
+      border-radius: 5px;
+
+      background:
+        var(--figma-color-bg);
+
+      color:
+        var(--figma-color-text);
+
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color:
+        var(--figma-color-border-brand);
+    }
+
+    input[type="color"] {
+      width: 72px;
+      height: 30px;
+
+      padding: 2px;
+
+      border:
+        1px solid
+        var(--figma-color-border);
+
+      border-radius: 5px;
+
+      background:
+        var(--figma-color-bg);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 10px;
+    }
+
+    .toggle-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toggle-label span:last-child {
+      color:
+        var(--figma-color-text-secondary);
+      font-size: 10px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .buttons button {
+      flex: 1;
+    }
+
+    #status {
+      min-height: 34px;
+
+      padding: 9px 10px;
+
+      border-radius: 6px;
+
+      background:
+        var(--figma-color-bg-secondary);
+
+      color:
+        var(--figma-color-text-secondary);
+
+      line-height: 1.4;
+    }
+
+    #status.success {
+      color:
+        var(--figma-color-text-success);
+    }
+
+    #status.error {
+      color:
+        var(--figma-color-text-danger);
+    }
+
+    #status.warning {
+      color:
+        var(--figma-color-text-warning);
+    }
+
+    .divider {
+      height: 1px;
+
+      background:
+        var(--figma-color-border);
+
+      margin: 16px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="title">
+    Focus Stroke
+  </div>
+
+  <div class="description">
+    원하는 화면 영역을 선택하면
+    자동으로 Highlight Stroke를 생성합니다.
+  </div>
+
+
+  <!-- ROOT FRAME -->
+
+  <div class="section">
+
+    <div class="section-title">
+      1. 기준 화면
+    </div>
+
+    <div
+      id="rootName"
+      class="root-box empty"
+    >
+      기준 Frame이 등록되지 않았습니다.
+    </div>
+
+    <button
+      id="setRoot"
+      class="secondary"
+    >
+      선택한 Frame을 기준으로 등록
+    </button>
+
+  </div>
+
+
+  <!-- TARGET -->
+
+  <div class="section">
+
+    <div class="section-title">
+      2. Highlight 영역
+    </div>
+
+    <div class="instruction">
+
+      <strong>
+        Frame 등록 후
+      </strong>
+
+      <br />
+
+      강조하고 싶은 Component 또는
+      여러 Layer를 선택해주세요.
+
+      <br />
+
+      선택된 영역의 최외곽을 기준으로
+      Stroke가 자동 생성됩니다.
+
+    </div>
+
+
+    <div class="toggle-row">
+
+      <div class="toggle-label">
+
+        <span>
+          실시간 미리보기
+        </span>
+
+        <span>
+          Selection 변경 시 자동 반영
+        </span>
+
+      </div>
+
+      <input
+        id="autoPreview"
+        type="checkbox"
+        checked
+      />
+
+    </div>
+
+
+    <button
+      id="refresh"
+      class="secondary"
+    >
+      현재 선택 영역 다시 계산
+    </button>
+
+
+    <div
+      id="selectionInfo"
+      class="selection-info"
+    >
+      선택된 영역 없음
+    </div>
+
+  </div>
+
+
+  <!-- SETTINGS -->
+
+  <div class="section">
+
+    <div class="section-title">
+      Stroke 설정
+    </div>
+
+
+    <div class="row">
+
+      <label>
+        여백
+      </label>
+
+      <input
+        id="padding"
+        type="number"
+        value="4"
+        min="0"
+        max="100"
+      />
+
+    </div>
+
+
+    <div class="row">
+
+      <label>
+        Stroke
+      </label>
+
+      <input
+        id="strokeWeight"
+        type="number"
+        value="3"
+        min="1"
+        max="20"
+      />
+
+    </div>
+
+
+    <div class="row">
+
+      <label>
+        Radius
+      </label>
+
+      <input
+        id="radius"
+        type="number"
+        value="10"
+        min="0"
+        max="100"
+      />
+
+    </div>
+
+
+    <div class="row">
+
+      <label>
+        Color
+      </label>
+
+      <input
+        id="color"
+        type="color"
+        value="#E63312"
+      />
+
+    </div>
+
+  </div>
+
+
+  <div class="buttons">
+
+    <button
+      id="removePreview"
+      class="secondary"
+    >
+      미리보기 제거
+    </button>
+
+    <button
+      id="confirm"
+      class="primary"
+    >
+      Highlight 확정
+    </button>
+
+  </div>
+
+
+  <div class="divider"></div>
+
+
+  <div class="section">
+
+    <button
+      id="clearAll"
+      class="danger"
+    >
+      이 Frame의 Highlight 전체 삭제
+    </button>
+
+  </div>
+
+
+  <div
+    id="status"
+  >
+    기준 Frame을 먼저 등록해주세요.
+  </div>
+
+
+  <script>
+
+    const rootName =
+      document.getElementById("rootName");
+
+    const status =
+      document.getElementById("status");
+
+    const selectionInfo =
+      document.getElementById("selectionInfo");
+
+
+    const padding =
+      document.getElementById("padding");
+
+    const strokeWeight =
+      document.getElementById("strokeWeight");
+
+    const radius =
+      document.getElementById("radius");
+
+    const color =
+      document.getElementById("color");
+
+    const autoPreview =
+      document.getElementById("autoPreview");
+
+
+    function send(type, data = {}) {
+
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type,
+            ...data
+          }
+        },
+        "*"
+      );
+
+    }
+
+
+    function sendSettings() {
+
+      send("settings", {
+
+        settings: {
+
+          padding:
+            Number(padding.value) || 0,
+
+          strokeWeight:
+            Number(strokeWeight.value) || 1,
+
+          radius:
+            Number(radius.value) || 0,
+
+          color:
+            color.value,
+
+          autoPreview:
+            autoPreview.checked
+        }
+
+      });
+
+    }
+
+
+    document
+      .getElementById("setRoot")
+      .onclick = () => {
+
+        send("set-root");
+
+      };
+
+
+    document
+      .getElementById("refresh")
+      .onclick = () => {
+
+        send("refresh-preview");
+
+      };
+
+
+    document
+      .getElementById("confirm")
+      .onclick = () => {
+
+        send("confirm");
+
+      };
+
+
+    document
+      .getElementById("removePreview")
+      .onclick = () => {
+
+        send("remove-preview");
+
+      };
+
+
+    document
+      .getElementById("clearAll")
+      .onclick = () => {
+
+        send("clear-all");
+
+      };
+
+
+    [
+      padding,
+      strokeWeight,
+      radius,
+      color,
+      autoPreview
+    ].forEach((element) => {
+
+      element.addEventListener(
+        "input",
+        sendSettings
+      );
+
+      element.addEventListener(
+        "change",
+        sendSettings
+      );
+
+    });
+
+
+    window.onmessage = (event) => {
+
+      const msg =
+        event.data.pluginMessage;
+
+      if (!msg) {
+        return;
+      }
+
+
+      if (msg.type === "root-set") {
+
+        rootName.textContent =
+          msg.name;
+
+        rootName.classList.remove(
+          "empty"
+        );
+
+      }
+
+
+      if (msg.type === "selection-info") {
+
+        if (!msg.count) {
+
+          selectionInfo.textContent =
+            "선택된 영역 없음";
+
+          return;
+        }
+
+        selectionInfo.textContent =
+          `${msg.count}개 Layer 선택 · ${msg.width} × ${msg.height}`;
+
+      }
+
+
+      if (msg.type === "status") {
+
+        status.textContent =
+          msg.message;
+
+        status.className = "";
+
+        if (msg.kind) {
+
+          status.classList.add(
+            msg.kind
+          );
+
+        }
+
+      }
+
+    };
+
+  </script>
+
+</body>
+</html>
