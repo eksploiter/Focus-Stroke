@@ -8,8 +8,13 @@
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       padding: 16px;
 
       font-family:
@@ -25,33 +30,60 @@
       color: var(--figma-color-text);
     }
 
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .header {
+      margin-bottom: 18px;
+    }
+
     .title {
       font-size: 16px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
 
     .description {
-      color: var(--figma-color-text-secondary);
+      font-size: 11px;
       line-height: 1.5;
-      margin-bottom: 18px;
+
+      color:
+        var(--figma-color-text-secondary);
     }
 
+
+    /* =====================================================
+       SECTION
+    ===================================================== */
+
     .section {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     .section-title {
       font-size: 11px;
       font-weight: 600;
+
+      color:
+        var(--figma-color-text-secondary);
+
       margin-bottom: 8px;
-      color: var(--figma-color-text-secondary);
     }
 
+
+    /* =====================================================
+       ROOT FRAME
+    ===================================================== */
+
     .root-box {
+      width: 100%;
+
       padding: 10px 12px;
 
-      border: 1px solid
+      border:
+        1px solid
         var(--figma-color-border);
 
       border-radius: 6px;
@@ -61,12 +93,57 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+
+      font-size: 11px;
     }
 
     .root-box.empty {
       color:
         var(--figma-color-text-tertiary);
     }
+
+
+    /* =====================================================
+       GUIDE
+    ===================================================== */
+
+    .guide-box {
+      padding: 12px;
+
+      background:
+        var(--figma-color-bg-secondary);
+
+      border-radius: 6px;
+
+      line-height: 1.6;
+
+      margin-bottom: 10px;
+
+      color:
+        var(--figma-color-text-secondary);
+    }
+
+    .guide-box strong {
+      color:
+        var(--figma-color-text);
+
+      font-weight: 600;
+    }
+
+    .guide-example {
+      margin-top: 8px;
+
+      padding-top: 8px;
+
+      border-top:
+        1px solid
+        var(--figma-color-border);
+    }
+
+
+    /* =====================================================
+       BUTTON
+    ===================================================== */
 
     button {
       width: 100%;
@@ -75,12 +152,18 @@
       border: none;
       border-radius: 6px;
 
-      cursor: pointer;
-
       font-size: 12px;
       font-weight: 600;
 
-      transition: 0.15s;
+      cursor: pointer;
+
+      transition:
+        background 0.15s,
+        opacity 0.15s;
+    }
+
+    button:active {
+      transform: translateY(1px);
     }
 
     .primary {
@@ -110,14 +193,15 @@
     }
 
     .danger {
-      background: transparent;
-
-      color:
-        var(--figma-color-text-danger);
+      background:
+        transparent;
 
       border:
         1px solid
         var(--figma-color-border);
+
+      color:
+        var(--figma-color-text-danger);
     }
 
     .danger:hover {
@@ -125,41 +209,62 @@
         var(--figma-color-bg-danger-tertiary);
     }
 
-    .instruction {
-      padding: 12px;
 
-      background:
-        var(--figma-color-bg-secondary);
-
-      border-radius: 6px;
-
-      line-height: 1.6;
-
-      margin-bottom: 10px;
-    }
-
-    .instruction strong {
-      font-weight: 700;
-    }
+    /* =====================================================
+       SELECTION
+    ===================================================== */
 
     .selection-info {
       margin-top: 8px;
+
+      font-size: 11px;
 
       color:
         var(--figma-color-text-secondary);
     }
 
-    .row {
+
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
+
+    .setting-row {
       display: flex;
-      gap: 8px;
       align-items: center;
+      justify-content: space-between;
 
-      margin-bottom: 8px;
+      min-height: 36px;
+
+      border-bottom:
+        1px solid
+        var(--figma-color-border);
     }
 
-    .row label {
-      flex: 1;
+    .setting-row:last-child {
+      border-bottom: none;
     }
+
+    .setting-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .setting-label-main {
+      font-size: 12px;
+    }
+
+    .setting-label-sub {
+      font-size: 10px;
+
+      color:
+        var(--figma-color-text-secondary);
+    }
+
+
+    /* =====================================================
+       INPUT
+    ===================================================== */
 
     input[type="number"] {
       width: 72px;
@@ -173,19 +278,23 @@
 
       border-radius: 5px;
 
+      outline: none;
+
       background:
         var(--figma-color-bg);
 
       color:
         var(--figma-color-text);
 
-      outline: none;
+      font-family: inherit;
+      font-size: 11px;
     }
 
     input[type="number"]:focus {
       border-color:
         var(--figma-color-border-brand);
     }
+
 
     input[type="color"] {
       width: 72px;
@@ -199,9 +308,16 @@
 
       border-radius: 5px;
 
+      cursor: pointer;
+
       background:
         var(--figma-color-bg);
     }
+
+
+    /* =====================================================
+       CHECKBOX
+    ===================================================== */
 
     .toggle-row {
       display: flex;
@@ -211,31 +327,68 @@
       margin-bottom: 10px;
     }
 
-    .toggle-label {
+    .toggle-text {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
 
-    .toggle-label span:last-child {
-      color:
-        var(--figma-color-text-secondary);
-      font-size: 10px;
+    .toggle-title {
+      font-size: 12px;
     }
 
-    .buttons {
+    .toggle-sub {
+      font-size: 10px;
+
+      color:
+        var(--figma-color-text-secondary);
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+
+      cursor: pointer;
+    }
+
+
+    /* =====================================================
+       BUTTON GROUP
+    ===================================================== */
+
+    .button-group {
       display: flex;
       gap: 8px;
     }
 
-    .buttons button {
+    .button-group button {
       flex: 1;
     }
 
-    #status {
-      min-height: 34px;
 
-      padding: 9px 10px;
+    /* =====================================================
+       DIVIDER
+    ===================================================== */
+
+    .divider {
+      width: 100%;
+      height: 1px;
+
+      background:
+        var(--figma-color-border);
+
+      margin: 18px 0;
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    .status {
+      min-height: 38px;
+
+      padding: 10px 11px;
 
       border-radius: 6px;
 
@@ -245,48 +398,51 @@
       color:
         var(--figma-color-text-secondary);
 
-      line-height: 1.4;
+      font-size: 11px;
+      line-height: 1.5;
     }
 
-    #status.success {
+    .status.success {
       color:
         var(--figma-color-text-success);
     }
 
-    #status.error {
+    .status.error {
       color:
         var(--figma-color-text-danger);
     }
 
-    #status.warning {
+    .status.warning {
       color:
         var(--figma-color-text-warning);
-    }
-
-    .divider {
-      height: 1px;
-
-      background:
-        var(--figma-color-border);
-
-      margin: 16px 0;
     }
   </style>
 </head>
 
+
 <body>
 
-  <div class="title">
-    Focus Stroke
+  <!-- ===================================================
+       HEADER
+  ==================================================== -->
+
+  <div class="header">
+
+    <div class="title">
+      Focus Stroke
+    </div>
+
+    <div class="description">
+      선택한 영역의 세로 위치를 기준으로
+      디자인 화면 너비에 맞는 Highlight를 생성합니다.
+    </div>
+
   </div>
 
-  <div class="description">
-    원하는 화면 영역을 선택하면
-    자동으로 Highlight Stroke를 생성합니다.
-  </div>
 
-
-  <!-- ROOT FRAME -->
+  <!-- ===================================================
+       ROOT FRAME
+  ==================================================== -->
 
   <div class="section">
 
@@ -294,12 +450,14 @@
       1. 기준 화면
     </div>
 
+
     <div
       id="rootName"
       class="root-box empty"
     >
       기준 Frame이 등록되지 않았습니다.
     </div>
+
 
     <button
       id="setRoot"
@@ -311,7 +469,9 @@
   </div>
 
 
-  <!-- TARGET -->
+  <!-- ===================================================
+       TARGET
+  ==================================================== -->
 
   <div class="section">
 
@@ -319,38 +479,40 @@
       2. Highlight 영역
     </div>
 
-    <div class="instruction">
+
+    <div class="guide-box">
 
       <strong>
-        Frame 등록 후
+        Highlight할 영역을 선택해주세요.
       </strong>
 
       <br />
 
-      강조하고 싶은 Component 또는
-      여러 Layer를 선택해주세요.
+      선택한 Layer의
+      <strong>세로 위치와 높이</strong>만 사용합니다.
 
-      <br />
-
-      선택된 영역의 최외곽을 기준으로
-      Stroke가 자동 생성됩니다.
+      <div class="guide-example">
+        Highlight의 가로 너비는 항상
+        기준 Frame 전체 너비를 기준으로 생성됩니다.
+      </div>
 
     </div>
 
 
     <div class="toggle-row">
 
-      <div class="toggle-label">
+      <div class="toggle-text">
 
-        <span>
+        <span class="toggle-title">
           실시간 미리보기
         </span>
 
-        <span>
+        <span class="toggle-sub">
           Selection 변경 시 자동 반영
         </span>
 
       </div>
+
 
       <input
         id="autoPreview"
@@ -379,23 +541,64 @@
   </div>
 
 
-  <!-- SETTINGS -->
+  <!-- ===================================================
+       SETTINGS
+  ==================================================== -->
 
   <div class="section">
 
     <div class="section-title">
-      Stroke 설정
+      Highlight 설정
     </div>
 
 
-    <div class="row">
+    <!-- SIDE MARGIN -->
 
-      <label>
-        여백
-      </label>
+    <div class="setting-row">
+
+      <div class="setting-label">
+
+        <span class="setting-label-main">
+          좌우 여백
+        </span>
+
+        <span class="setting-label-sub">
+          Frame 가장자리와의 거리
+        </span>
+
+      </div>
+
 
       <input
-        id="padding"
+        id="sideMargin"
+        type="number"
+        value="16"
+        min="0"
+        max="100"
+      />
+
+    </div>
+
+
+    <!-- VERTICAL PADDING -->
+
+    <div class="setting-row">
+
+      <div class="setting-label">
+
+        <span class="setting-label-main">
+          위아래 여백
+        </span>
+
+        <span class="setting-label-sub">
+          선택 영역과 Stroke 사이
+        </span>
+
+      </div>
+
+
+      <input
+        id="verticalPadding"
         type="number"
         value="4"
         min="0"
@@ -405,11 +608,22 @@
     </div>
 
 
-    <div class="row">
+    <!-- STROKE -->
 
-      <label>
-        Stroke
-      </label>
+    <div class="setting-row">
+
+      <div class="setting-label">
+
+        <span class="setting-label-main">
+          Stroke
+        </span>
+
+        <span class="setting-label-sub">
+          테두리 두께
+        </span>
+
+      </div>
+
 
       <input
         id="strokeWeight"
@@ -422,11 +636,22 @@
     </div>
 
 
-    <div class="row">
+    <!-- RADIUS -->
 
-      <label>
-        Radius
-      </label>
+    <div class="setting-row">
+
+      <div class="setting-label">
+
+        <span class="setting-label-main">
+          Radius
+        </span>
+
+        <span class="setting-label-sub">
+          모서리 둥글기
+        </span>
+
+      </div>
+
 
       <input
         id="radius"
@@ -439,11 +664,22 @@
     </div>
 
 
-    <div class="row">
+    <!-- COLOR -->
 
-      <label>
-        Color
-      </label>
+    <div class="setting-row">
+
+      <div class="setting-label">
+
+        <span class="setting-label-main">
+          Color
+        </span>
+
+        <span class="setting-label-sub">
+          Highlight 색상
+        </span>
+
+      </div>
+
 
       <input
         id="color"
@@ -456,7 +692,11 @@
   </div>
 
 
-  <div class="buttons">
+  <!-- ===================================================
+       ACTIONS
+  ==================================================== -->
+
+  <div class="button-group">
 
     <button
       id="removePreview"
@@ -464,6 +704,7 @@
     >
       미리보기 제거
     </button>
+
 
     <button
       id="confirm"
@@ -478,6 +719,10 @@
   <div class="divider"></div>
 
 
+  <!-- ===================================================
+       CLEAR
+  ==================================================== -->
+
   <div class="section">
 
     <button
@@ -490,42 +735,90 @@
   </div>
 
 
+  <!-- ===================================================
+       STATUS
+  ==================================================== -->
+
   <div
     id="status"
+    class="status"
   >
     기준 Frame을 먼저 등록해주세요.
   </div>
 
 
+  <!-- ===================================================
+       SCRIPT
+  ==================================================== -->
+
   <script>
 
-    const rootName =
-      document.getElementById("rootName");
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
 
-    const status =
-      document.getElementById("status");
+    const rootName =
+      document.getElementById(
+        "rootName"
+      );
+
 
     const selectionInfo =
-      document.getElementById("selectionInfo");
+      document.getElementById(
+        "selectionInfo"
+      );
 
 
-    const padding =
-      document.getElementById("padding");
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+
+    const sideMargin =
+      document.getElementById(
+        "sideMargin"
+      );
+
+
+    const verticalPadding =
+      document.getElementById(
+        "verticalPadding"
+      );
+
 
     const strokeWeight =
-      document.getElementById("strokeWeight");
+      document.getElementById(
+        "strokeWeight"
+      );
+
 
     const radius =
-      document.getElementById("radius");
+      document.getElementById(
+        "radius"
+      );
+
 
     const color =
-      document.getElementById("color");
+      document.getElementById(
+        "color"
+      );
+
 
     const autoPreview =
-      document.getElementById("autoPreview");
+      document.getElementById(
+        "autoPreview"
+      );
 
 
-    function send(type, data = {}) {
+    /* =====================================================
+       POST MESSAGE
+    ===================================================== */
+
+    function send(
+      type,
+      data = {}
+    ) {
 
       parent.postMessage(
         {
@@ -536,159 +829,253 @@
         },
         "*"
       );
-
     }
 
+
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
 
     function sendSettings() {
 
-      send("settings", {
+      send(
+        "settings",
+        {
+          settings: {
 
-        settings: {
+            sideMargin:
+              Number(
+                sideMargin.value
+              ) || 0,
 
-          padding:
-            Number(padding.value) || 0,
+            verticalPadding:
+              Number(
+                verticalPadding.value
+              ) || 0,
 
-          strokeWeight:
-            Number(strokeWeight.value) || 1,
+            strokeWeight:
+              Number(
+                strokeWeight.value
+              ) || 1,
 
-          radius:
-            Number(radius.value) || 0,
+            radius:
+              Number(
+                radius.value
+              ) || 0,
 
-          color:
-            color.value,
+            color:
+              color.value,
 
-          autoPreview:
-            autoPreview.checked
+            autoPreview:
+              autoPreview.checked
+          }
         }
-
-      });
-
+      );
     }
 
 
-    document
-      .getElementById("setRoot")
-      .onclick = () => {
-
-        send("set-root");
-
-      };
-
+    /* =====================================================
+       BUTTON EVENTS
+    ===================================================== */
 
     document
-      .getElementById("refresh")
-      .onclick = () => {
+      .getElementById(
+        "setRoot"
+      )
+      .addEventListener(
+        "click",
+        () => {
 
-        send("refresh-preview");
+          send(
+            "set-root"
+          );
 
-      };
-
-
-    document
-      .getElementById("confirm")
-      .onclick = () => {
-
-        send("confirm");
-
-      };
+        }
+      );
 
 
     document
-      .getElementById("removePreview")
-      .onclick = () => {
+      .getElementById(
+        "refresh"
+      )
+      .addEventListener(
+        "click",
+        () => {
 
-        send("remove-preview");
+          send(
+            "refresh-preview"
+          );
 
-      };
+        }
+      );
 
 
     document
-      .getElementById("clearAll")
-      .onclick = () => {
+      .getElementById(
+        "removePreview"
+      )
+      .addEventListener(
+        "click",
+        () => {
 
-        send("clear-all");
+          send(
+            "remove-preview"
+          );
 
-      };
+        }
+      );
 
+
+    document
+      .getElementById(
+        "confirm"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          send(
+            "confirm"
+          );
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        "clearAll"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          send(
+            "clear-all"
+          );
+
+        }
+      );
+
+
+    /* =====================================================
+       SETTING EVENTS
+    ===================================================== */
 
     [
-      padding,
+      sideMargin,
+      verticalPadding,
       strokeWeight,
       radius,
       color,
       autoPreview
-    ].forEach((element) => {
+    ].forEach(
+      (element) => {
 
-      element.addEventListener(
-        "input",
-        sendSettings
-      );
+        element.addEventListener(
+          "input",
+          sendSettings
+        );
 
-      element.addEventListener(
-        "change",
-        sendSettings
-      );
-
-    });
-
-
-    window.onmessage = (event) => {
-
-      const msg =
-        event.data.pluginMessage;
-
-      if (!msg) {
-        return;
-      }
-
-
-      if (msg.type === "root-set") {
-
-        rootName.textContent =
-          msg.name;
-
-        rootName.classList.remove(
-          "empty"
+        element.addEventListener(
+          "change",
+          sendSettings
         );
 
       }
+    );
 
 
-      if (msg.type === "selection-info") {
+    /* =====================================================
+       MESSAGE FROM CODE.JS
+    ===================================================== */
 
-        if (!msg.count) {
+    window.onmessage =
+      (event) => {
 
-          selectionInfo.textContent =
-            "선택된 영역 없음";
+        const msg =
+          event.data.pluginMessage;
 
+
+        if (!msg) {
           return;
         }
 
-        selectionInfo.textContent =
-          `${msg.count}개 Layer 선택 · ${msg.width} × ${msg.height}`;
 
-      }
+        /* -------------------------------------------------
+           ROOT FRAME
+        -------------------------------------------------- */
+
+        if (
+          msg.type ===
+          "root-set"
+        ) {
+
+          rootName.textContent =
+            msg.width
+              ? `${msg.name} · ${msg.width}px`
+              : msg.name;
 
 
-      if (msg.type === "status") {
-
-        status.textContent =
-          msg.message;
-
-        status.className = "";
-
-        if (msg.kind) {
-
-          status.classList.add(
-            msg.kind
+          rootName.classList.remove(
+            "empty"
           );
 
         }
 
-      }
 
-    };
+        /* -------------------------------------------------
+           SELECTION INFO
+        -------------------------------------------------- */
+
+        if (
+          msg.type ===
+          "selection-info"
+        ) {
+
+          if (!msg.count) {
+
+            selectionInfo.textContent =
+              "선택된 영역 없음";
+
+            return;
+          }
+
+
+          selectionInfo.textContent =
+            `${msg.count}개 Layer 선택 · Highlight ${msg.width} × ${msg.height}px`;
+
+        }
+
+
+        /* -------------------------------------------------
+           STATUS
+        -------------------------------------------------- */
+
+        if (
+          msg.type ===
+          "status"
+        ) {
+
+          status.textContent =
+            msg.message;
+
+
+          status.className =
+            "status";
+
+
+          if (msg.kind) {
+
+            status.classList.add(
+              msg.kind
+            );
+
+          }
+
+        }
+
+      };
 
   </script>
 
